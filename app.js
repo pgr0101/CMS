@@ -4,6 +4,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyparser = require("body-parser");
+var mongoose = require("mongoose");
+
+mongoose.connect("mongodb://localhost:27017");
+var db = mongoose.connection();
+
+db.once('open' , function () {
+  console.log("connected and ready to start sever");
+});
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
