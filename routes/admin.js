@@ -6,7 +6,7 @@ router.get('/dashboard' , function(req , res , next){
 });
 
 router.post('/dashboard' , function (req, res, next) {
-    // TODO : change settings and generals of the site updating mongoose
+    // TODO : change settings and generals of the site
 
     res.json({status : 200 ,
         msg : "change settings and site",
@@ -19,7 +19,7 @@ router.get('/post' , function (req, res, next) {
 });
 
 router.post('/post' , function (req, res, next) {
-    // TODO saving post in mongoose
+    // TODO saving post
 
     res.json({status : 200 ,
         msg : "post request",
