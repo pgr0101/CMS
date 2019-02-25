@@ -93,8 +93,10 @@ module.exports.addPost = function
     // first check the session then do something here
     // in session or cookie we saved the username and passwd
     let canPost = canSignIn(userName , passwd);
-    let user = getUserByUsername(userName);
-    user.posts.push(postID);
-    user.save(callback);
+    if(canPost){
+        let user = getUserByUsername(userName);
+        user.posts.push(postID);
+        user.save(callback);
+    }
 };
 
