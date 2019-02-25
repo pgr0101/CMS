@@ -17,6 +17,7 @@
     "mongodb": "*",
     "bcryptjs": "*",
     "nodemailer": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "mongoose-unique-validator" : "*"
   }
 }

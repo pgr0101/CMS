@@ -1,5 +1,6 @@
 let mongoose = require('mongoose');
 let bcrypt = require('bcryptjs');
+var uniqueValidator = require('mongoose-unique-validator');
 
 // TOSET the name
 mongoose.connect('mongodb://localhost/name???');
@@ -8,7 +9,8 @@ var db = mongoose.connection;
 
 let UserSchema = mongoose.Schema({
    username : {
-       type : String
+       type : String , 
+       unique : true
    } ,
 
    password : {
@@ -25,13 +27,15 @@ let UserSchema = mongoose.Schema({
 
    savedPosts : [
        {
-           type : mongoose.Types.ObjectId
+           type : mongoose.Types.ObjectId , 
+           ref : 'Post'
        }
    ] ,
 
    posts : [
        {
-            type : mongoose.Types.ObjectId
+            type : mongoose.Types.ObjectId , 
+            ref : 'Post'
        }
    ]
 } ,  {
@@ -47,74 +51,50 @@ let UserSchema = mongoose.Schema({
     }
 });
 
+UserSchema.plugin(uniqueValidator);
+
 var User = module.exports = mongoose.model(
     "User" ,
     UserSchema);
 
 module.exports.register = function(userDoc, cb){
-    // TODO adding users to collection
-    bcrypt.hash(userDoc.password , 12 , function (err, hash) {
+    // TODO : adding users to collection
+    bcrypt.hash(userDoc.password , 10 , function (err, hash) {
        if(!err){
            userDoc.password = hash;
+           // take the error and check that for unique
            userDoc.save(cb);
        }
     });
 };
 
 
-module.exports.getUserByUsername = function(userName){
-    // TODO find user By username
-    return User.findOne({username : userName});
+module.exports.getUserByUsername = async function(userName){
+    // TODO : find user By username and return it
+    return await User.findOne({username : userName});
 };
 
-module.exports.canSignIn = function(userName , psswd){
-    // TODO return true if user can log in with args
+module.exports.canSignIn = function(userName , passwd){
+    // TODO return true if user can log in with args return boolean answer
+    let user = getUserByUsername(userName);
+    return await bcrypt.compare(passwd , user.password);
 };
 
-module.exports.addToSavedPost = function(postID){
-    // TODO save the postid to saved posts
+module.exports.addToSaved = function(userName , postID , callback){
+    // TODO : save the postid to saved posts
+    let user = getUserByUsername(userName);
+    user.savedPosts.push(postID);
+    user.save(callback);
 };
 
-module.exports.addPost = function(postID){
+module.exports.addPost = function
+        (userName , passwd ,postID , callback){
     // TODO adding the post id to user posts
+    // first check the session then do something here
+    // in session or cookie we saved the username and passwd
+    let canPost = canSignIn(userName , passwd);
+    let user = getUserByUsername(userName);
+    user.posts.push(postID);
+    user.save(callback);
 };
 
-
-
-///////////////////////////////////////////
-module.exports.comparePassword = function(candidatePassowrd, hash, callback){
-    bcrypt.compare(candidatePassowrd, hash, function(err, isMatch){
-        if(err) return callback(err);
-        callback(null, isMatch);
-    });
-}
-
-UserSchema.statics.authenticate = function (email, password, callback) {
-    User.findOne({ email: email })
-        .exec(function (err, user) {
-            if (err) {
-                return callback(err)
-            } else if (!user) {
-                var err = new Error('User not found.');
-                err.status = 401;
-                return callback(err);
-            }
-            bcrypt.compare(password, user.password, function (err, result) {
-                if (result === true) {
-                    return callback(null, user);
-                } else {
-                    return callback();
-                }
-            })
-        });
-}
-
-module.exports.getUserById = function(id, callback){
-    User.findById(id, callback);
-}
-
-module.exports.getUserByUsername = function(username, callback){
-    var query = {username: username};
-    User.findOne(query, callback);
-}
-////////////////////////////////////////////
