@@ -6,8 +6,7 @@ let PostSchema = mongoose.Schema({
    } ,
 
    author : {
-       type : mongoose.Types.ObjectId ,
-       ref : 'User'
+       type : String
    } ,
 
    text : {
@@ -75,5 +74,5 @@ module.exports.getPostByPostID = function(postID , callback){
 module.exports.savePost = function(postDoc , callback){
     // TODO save the post document
     // session or cookie check with canSignIn
-    postDoc.save(callbak); // cb
+    postDoc.save(callback); // cb
 };

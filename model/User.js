@@ -9,32 +9,43 @@ var db = mongoose.connection;
 
 let UserSchema = mongoose.Schema({
    username : {
-       type : String , 
-       unique : true
+       type : String ,
+       unique : true ,
+       required : true
    } ,
 
    password : {
-       type : String
+       type : String,
+       required : true
    } ,
 
    Email : {
-       type : String
+       type : String ,
+       required : true
    } ,
 
    phoneNumber : {
-       type : String
+       type : String ,
+       required : true
    } ,
+
+   isAdmin : {
+       type : Boolean
+   },
 
    savedPosts : [
        {
-           type : mongoose.Types.ObjectId , 
+           type : mongoose.Types.ObjectId ,
            ref : 'Post'
        }
    ] ,
+   profileImage : {
+       type : String
+   } ,
 
    posts : [
        {
-            type : mongoose.Types.ObjectId , 
+            type : mongoose.Types.ObjectId ,
             ref : 'Post'
        }
    ]
@@ -71,7 +82,8 @@ module.exports.register = function(userDoc, cb){
 
 module.exports.getUserByUsername = async function(userName){
     // TODO : find user By username and return it
-    return await User.findOne({username : userName});
+    let user = await User.findOne({username : userName});
+    return user;
 };
 
 module.exports.canSignIn = function(userName , passwd){
@@ -88,15 +100,13 @@ module.exports.addToSaved = function(userName , postID , callback){
 };
 
 module.exports.addPost = function
-        (userName , passwd ,postID , callback){
+        (userName ,postID , callback){
     // TODO adding the post id to user posts
     // first check the session then do something here
     // in session or cookie we saved the username and passwd
-    let canPost = canSignIn(userName , passwd);
-    if(canPost){
-        let user = getUserByUsername(userName);
-        user.posts.push(postID);
-        user.save(callback);
-    }
+    let user = getUserByUsername(userName);
+    user.posts.push(postID);
+    user.save(callback);
+
 };
 

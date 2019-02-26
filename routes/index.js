@@ -6,67 +6,90 @@ var User = require('../model/User');
 
 router.get('/', function(req, res, next) {
   // TODO : rendering the admin posts on the home page
-
-  res.render('index', { title: 'Express' });
-});
-
-router.get('/login' , function (req, res, next) {
-
-  // TODO : res.render("login" , data);
-  // req.body.nameofattr
-  //   req.checkBody('name',
-  //       'Name field is required').notEmpty();
-  //   req.checkBody('password2',
-  //       'Password do not match').equals(req.body.password);
-  //
-  //   var errors = req.validationErrors();
-
+  // should return index page of vue from front end
+  res.render('index');
 });
 
 router.post('/login' , function (req, res, next) {
-  // TODO : authentication and sending json
-  // if the user is admin the abilities are different
-  res.json({status : 200 ,
-            msg : "login request" ,
-            data : null});
-});
-
-router.get('/signup' , function (req, res, next) {
-  // TODO : res.render("signup" , data)
-
+    // TODO : authentication and sending json
+    let falg = User.canSignIn(req.userName , req.password);
+    if(flag){
+      let user = User.getUserByUsername(req.userName);
+      if(user.isAdmin){
+        res.json({
+          status : 200 ,
+          msg : "welcome admin" ,
+          data : {
+            isAdmin : true
+          }
+        });
+      }else{
+        res.json({
+          status : 200 ,
+          msg : "welcome user" ,
+          data : user
+        });
+      }
+      req.session.username = req.body.userName;
+      req.session.password = req.body.password;
+    }else{
+      res.json({
+        status : 401 ,
+        msg : "auth problem username or password wrong" ,
+        data : null
+      })
+    }
 });
 
 router.post('/signup' , function (req, res , next) {
-  // TODO : adding a user and mongoose
-    //   var newUser = new User({
-  //       name: name,
-  //       email: email,
-  //       username: username,
-  //       password: password,
-  //       profileImage: profileImageName
-  //   });
-  //
-  //   // Create User
-  //   User.createUser(newUser, function(err, user){
-  //       if(err)throw err;
-  //       console.log(user);
-  //   });
-  if(!User.getUserByUsername(req.body.username)) {
+
+  let user = new User({
+    username : req.body.username ,
+    Email : req.body.email ,
+    phoneNumber : req.body.phoneNumber ,
+    password : req.body.password,
+    profileImage : req.body.ProfileURL
+  });
+  User.register(user , function(err , user){
+    if(err){
       res.json({
-          status: 200,
-          msg: "request for siging up",
-          data: null
+        status : 406,
+        msg : "Not acceptable data",
+        error : err,
+        data : null
       });
-  }else {
+    } else if(user){
       res.json({
-          status: 201,
-          msg: "request for siging up",
-          errs : "username invalid" ,
-          data: null
+        status : 200 ,
+        msg : "user saved" ,
+        data : {
+          username : user.username ,
+          Email : user.Email ,
+          phoneNumber : user.phoneNumber
+        }
       });
-  }
+    }
+  });
 });
 
+
+module.exports = router;
+
+
+/*
+200 OK
+201 CreatedAccepted
+204 No Content
+304 Not Modified
+400 Bad Request
+401 Unauthorized
+402 Payment Required
+403 Forbidden
+406 Not Acceptable
+500 Internal Server Error
+*/
+
+/*
 router.post('/loginPassport',
     passport.authenticate('local'),
     function(req, res) {
@@ -74,6 +97,4 @@ router.post('/loginPassport',
         // `req.user` contains the authenticated user.
         res.redirect('/users/' + req.user.username);
     });
-
-
-module.exports = router;
+*/
