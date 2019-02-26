@@ -13,6 +13,11 @@ let PostSchema = mongoose.Schema({
       type : String
    } ,
 
+   date : {
+      type : Date ,
+      default : Date.now
+   },
+
    comments : [{
         type : String // regexp username@text
    }] ,
@@ -45,7 +50,7 @@ let PostSchema = mongoose.Schema({
     }
 });
 
-var Post = module.exprts = mongoose.model('Post' , PostSchema);
+var Post = module.exports = mongoose.model('Post' , PostSchema);
 
 
 module.exports.like = function(userName , postID , cb){
@@ -76,3 +81,12 @@ module.exports.savePost = function(postDoc , callback){
     // session or cookie check with canSignIn
     postDoc.save(callback); // cb
 };
+
+module.exports.deletePostByID = function(postid , cb){
+    Post.deleteOne({_id : postid} , cb);
+}
+
+module.exports.postsOnTop = function(cb){
+    Post.find({})
+    .sort('date').exec(cb);
+}

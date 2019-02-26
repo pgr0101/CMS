@@ -1,18 +1,39 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../model/User');
+var Post = require('../model/Post');
 
 // sample json model : JSON {status , msg , data , errs}
 
 router.get('/', function(req, res, next) {
   // TODO : rendering the admin posts on the home page
   // should return index page of vue from front end
+  // have to send some data with onload method latest posts
   res.render('index');
+});
+
+router.get('/posts' , function(req , res){
+    Post.postsOnTop(function(err , posts){
+      if(err){
+        res.json({
+          status : 406 ,
+          msg : "an error ocurred",
+          error : err ,
+          data : null
+        });
+      }else {
+        res.json({
+          status : 200 ,
+          msg : "found some posts" ,
+          data : docs
+        });
+      }
+    });
 });
 
 router.post('/login' , function (req, res, next) {
     // TODO : authentication and sending json
-    let falg = User.canSignIn(req.userName , req.password);
+    let flag = User.canSignIn(req.userName , req.password);
     if(flag){
       let user = User.getUserByUsername(req.userName);
       if(user.isAdmin){

@@ -102,11 +102,14 @@ module.exports.addToSaved = function(userName , postID , callback){
 module.exports.addPost = function
         (userName ,postID , callback){
     // TODO adding the post id to user posts
-    // first check the session then do something here
-    // in session or cookie we saved the username and passwd
     let user = getUserByUsername(userName);
     user.posts.push(postID);
     user.save(callback);
 
 };
+
+module.exports.getPosts = function(username , cb){
+    User.findOne({userName : username}).
+        populate('posts').exec(cb);
+}
 
