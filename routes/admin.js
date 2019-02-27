@@ -106,7 +106,7 @@ router.post("/changeprofile", function(req, res) {
     if(flag){
         let user = User
             .getUserByUsername(req.session.userName);
-        user.profileImage = req.body.profileUrl;
+        user.profileImage = req.body.profile;
         user.save(function(err , user){
             res.json({
                 status : 200,

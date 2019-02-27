@@ -19,6 +19,6 @@
     "nodemailer": "*",
     "body-parser": "*",
     "mongoose-unique-validator": "*",
-    "connect": "*"
+    "express-session": "*"
   }
 }

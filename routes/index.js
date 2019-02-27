@@ -23,43 +23,47 @@ router.get('/posts' , function(req , res){
         res.json({
           status : 200 ,
           msg : "found some posts" ,
-          data : docs
+          data : posts
         });
       }
     });
 });
 
 router.post('/login' , function (req, res, next) {
-
-    console.log("req come");
-    let flag = User.canSignIn(req.userName , req.password);
-    if(flag){
-      let user = User.getUserByUsername(req.userName);
-      if(user.isAdmin){
-        res.json({
-          status : 200 ,
-          msg : "welcome admin" ,
-          data : {
-            isAdmin : true
+    User.getUserByUsername(req.body.username ,function(err , user){
+        let flag = User.comparePass(req.body.password , user.password);
+        if(flag){
+          try {
+              req.session.username = req.body.username;
+              req.session.password = req.body.password;
+          }catch(e){
+              console.log(e);
           }
-        });
-      }else{
-        console.log("res done");
-        res.json({
-          status : 200 ,
-          msg : "welcome user" ,
-          data : user
-        });
-      }
-      req.session.username = req.body.userName;
-      req.session.password = req.body.password;
-    }else{
-      res.json({
-        status : 401 ,
-        msg : "auth problem username or password wrong" ,
-        data : null
-      })
-    }
+          if(user.isAdmin){
+                res.json({
+                    status : 200 ,
+                    msg : "welcome admin" ,
+                    data : {
+                        isAdmin : true
+                    }
+                });
+            }else{
+                console.log("res done");
+                res.json({
+                    status : 200 ,
+                    msg : "welcome user" ,
+                    data : user
+                });
+            }
+        }else{
+            res.json({
+                status : 401 ,
+                msg : "auth problem username or password wrong" ,
+                data : null
+            })
+        }
+
+    });
 });
 
 router.post('/signup' , function (req, res , next) {
@@ -67,9 +71,9 @@ router.post('/signup' , function (req, res , next) {
   let user = new User({
     username : req.body.username ,
     Email : req.body.email ,
-    phoneNumber : req.body.phonenumber ,
-    password : req.body.password
-    //profileImage : (req.body.profileUrl != null ? req.body.profileUrl : null)
+    phoneNumber : req.body.phone ,
+    password : req.body.password ,
+    profileImage : (req.body.profile != null ? req.body.profile : null)
   });
   User.register(user , function(err , user){
     if(err){
@@ -94,6 +98,11 @@ router.post('/signup' , function (req, res , next) {
   });
 });
 
+router.post('/logout' , function(req , res){
+  req.session.username = undefined;
+  req.session.password = undefined;
+
+});
 
 module.exports = router;
 

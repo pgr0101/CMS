@@ -1,15 +1,11 @@
-var createError = require('http-errors');
 var express = require('express');
 var expressValidator = require('express-validator');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var bodyparser = require("body-parser");
 var mongoose = require('mongoose');
-var mongodb = require('mongodb');
-var bcrypt = require('bcryptjs');
-var nodemailer = require('nodemailer');
-//let connect  = require('connect');
+var session = require('express-session');
+
 
 mongoose.connect("mongodb://127.0.0.1:27017/CMS");
 let db = mongoose.connection.on('open' , function () {
@@ -30,7 +26,7 @@ app.set('view engine', 'pug');
 
 
 // Validator
-/*app.use(expressValidator({
+app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
     var namespace = param.split('.')
         , root    = namespace.shift()
@@ -45,15 +41,15 @@ app.set('view engine', 'pug');
       value : value
     };
   }
-}));*/
-///////////////////////////////////////////////////
+}));
 
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use(express.json());
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({extended : true}));
+app.use(express.json());
+app.use(express.urlencoded({extended : false}));
+app.use(session({secret: "Shh, its a secret!"}));
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
