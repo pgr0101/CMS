@@ -30,9 +30,7 @@ let PostSchema = mongoose.Schema({
    }] ,
 
    imagesUrl : [{
-       url : {
            type : String
-       }
    }] ,
 
    like : {
@@ -58,7 +56,6 @@ let PostSchema = mongoose.Schema({
 });
 
 var Post = module.exports = mongoose.model('Post' , PostSchema);
-
 
 module.exports.like = function(userName , postID , cb){
     // TODO like increment & adding the username to likers

@@ -4,10 +4,14 @@ var User = require("../model/User");
 var Post = require("../model/Post");
 
 function isAdmin(username , password){
-    let flag = User.canSignIn(username , password);
-    let user = User.getUserByUsername(username);
-    flag = user.isAdmin;
-    return flag;
+    let answer = false;
+    User.getUserByUsername(username , function(err , user){
+        let flag = User.comparePass(password , user.password);
+        if(flag){
+            answer = user.isAdmin;
+        }
+    });
+    return answer;
 };
 
 // just the dashboard part need to be completed

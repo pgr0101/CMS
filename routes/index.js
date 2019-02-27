@@ -31,43 +31,49 @@ router.get('/posts' , function(req , res){
 
 router.post('/login' , function (req, res, next) {
     User.getUserByUsername(req.body.username ,function(err , user){
-        let flag = User.comparePass(req.body.password , user.password);
-        if(flag){
-          try {
-              req.session.username = req.body.username;
-              req.session.password = req.body.password;
-          }catch(e){
-              console.log(e);
-          }
-          if(user.isAdmin){
-                res.json({
-                    status : 200 ,
-                    msg : "welcome admin" ,
-                    data : {
-                        isAdmin : true
-                    }
-                });
+        if(!err){
+            let flag = User.comparePass(req.body.password , user.password);
+            if(flag){
+              try {
+                  req.session.username = req.body.username;
+                  req.session.password = req.body.password;
+              }catch(e){
+                  console.log(e);
+              }
+              if(user.isAdmin){
+                    res.json({
+                        status : 200 ,
+                        msg : "welcome admin" ,
+                        data : {
+                            isAdmin : true
+                        }
+                    });
+                }else{
+                    console.log("res done");
+                    res.json({
+                        status : 200 ,
+                        msg : "welcome user" ,
+                        data : user
+                    });
+                }
             }else{
-                console.log("res done");
                 res.json({
-                    status : 200 ,
-                    msg : "welcome user" ,
-                    data : user
-                });
+                    status : 401 ,
+                    msg : "auth problem username or password wrong" ,
+                    data : null
+                })
             }
         }else{
+            console.log(err);
             res.json({
-                status : 401 ,
-                msg : "auth problem username or password wrong" ,
-                data : null
-            })
+                status : 400 ,
+                msg : "error occurred",
+            });
         }
-
     });
 });
 
 router.post('/signup' , function (req, res , next) {
-  console.log(req.body);
   let user = new User({
     username : req.body.username ,
     Email : req.body.email ,
@@ -77,14 +83,13 @@ router.post('/signup' , function (req, res , next) {
   });
   User.register(user , function(err , user){
     if(err){
+        console.log(err);
       res.json({
         status : 406,
         msg : "Not acceptable data",
-        error : err,
         data : null
       });
     } else if(user){
-      console.log("res done");
       res.json({
         status : 200 ,
         msg : "user saved" ,
@@ -101,7 +106,10 @@ router.post('/signup' , function (req, res , next) {
 router.post('/logout' , function(req , res){
   req.session.username = undefined;
   req.session.password = undefined;
-
+  res.json({
+      status : 200 ,
+      msg  : "logged out"
+  });
 });
 
 module.exports = router;

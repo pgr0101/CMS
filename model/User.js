@@ -96,13 +96,9 @@ module.exports.addToSaved = function(userName , postID , callback){
     user.save(callback);
 };
 
-module.exports.addPost = function
-        (userName ,postID , callback){
+module.exports.addPost = function (userName , callback){
     // TODO adding the post id to user posts
-    let user = getUserByUsername(userName);
-    user.posts.push(postID);
-    user.save(callback);
-
+    User.getUserByUsername(userName , callback);
 };
 
 module.exports.getPosts = function(username , cb){
