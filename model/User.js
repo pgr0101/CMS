@@ -3,14 +3,16 @@ let bcrypt = require('bcryptjs');
 var uniqueValidator = require('mongoose-unique-validator');
 
 // TOSET the name
-mongoose.connect('mongodb://localhost/name???');
+mongoose.connect('mongodb://localhost:27017/CMS');
+let db = mongoose.connection.on('open' , function(){
+    console.log("done with User");
+});
 
-var db = mongoose.connection;
 
 let UserSchema = mongoose.Schema({
    username : {
        type : String ,
-       unique : true ,
+       //unique : true ,
        required : true
    } ,
 
@@ -25,7 +27,7 @@ let UserSchema = mongoose.Schema({
    } ,
 
    phoneNumber : {
-       type : String ,
+       type : Number ,
        required : true
    } ,
 
@@ -35,7 +37,7 @@ let UserSchema = mongoose.Schema({
 
    savedPosts : [
        {
-           type : mongoose.Types.ObjectId ,
+           type : mongoose.Schema.Types.ObjectId ,
            ref : 'Post'
        }
    ] ,
@@ -45,7 +47,7 @@ let UserSchema = mongoose.Schema({
 
    posts : [
        {
-            type : mongoose.Types.ObjectId ,
+            type : mongoose.Schema.Types.ObjectId ,
             ref : 'Post'
        }
    ]
@@ -62,7 +64,7 @@ let UserSchema = mongoose.Schema({
     }
 });
 
-UserSchema.plugin(uniqueValidator);
+//UserSchema.plugin(uniqueValidator);
 
 var User = module.exports = mongoose.model(
     "User" ,
@@ -86,7 +88,7 @@ module.exports.getUserByUsername = async function(userName){
     return user;
 };
 
-module.exports.canSignIn = function(userName , passwd){
+module.exports.canSignIn = async function(userName , passwd){
     // TODO return true if user can log in with args return boolean answer
     let user = getUserByUsername(userName);
     return await bcrypt.compare(passwd , user.password);

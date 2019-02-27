@@ -6,14 +6,11 @@ var Post = require('../model/Post');
 // sample json model : JSON {status , msg , data , errs}
 
 router.get('/', function(req, res, next) {
-  // TODO : rendering the admin posts on the home page
-  // should return index page of vue from front end
-  // have to send some data with onload method latest posts
   res.render('index');
 });
 
 router.get('/posts' , function(req , res){
-    Post.postsOnTop(function(err , posts){
+  Post.postsOnTop(function(err , posts){
       if(err){
         res.json({
           status : 406 ,
@@ -22,6 +19,7 @@ router.get('/posts' , function(req , res){
           data : null
         });
       }else {
+        console.log("res done");
         res.json({
           status : 200 ,
           msg : "found some posts" ,
@@ -32,7 +30,8 @@ router.get('/posts' , function(req , res){
 });
 
 router.post('/login' , function (req, res, next) {
-    // TODO : authentication and sending json
+
+    console.log("req come");
     let flag = User.canSignIn(req.userName , req.password);
     if(flag){
       let user = User.getUserByUsername(req.userName);
@@ -45,6 +44,7 @@ router.post('/login' , function (req, res, next) {
           }
         });
       }else{
+        console.log("res done");
         res.json({
           status : 200 ,
           msg : "welcome user" ,
@@ -63,13 +63,13 @@ router.post('/login' , function (req, res, next) {
 });
 
 router.post('/signup' , function (req, res , next) {
-
+  console.log(req.body);
   let user = new User({
     username : req.body.username ,
     Email : req.body.email ,
-    phoneNumber : req.body.phoneNumber ,
-    password : req.body.password,
-    profileImage : req.body.ProfileURL
+    phoneNumber : req.body.phonenumber ,
+    password : req.body.password
+    //profileImage : (req.body.profileUrl != null ? req.body.profileUrl : null)
   });
   User.register(user , function(err , user){
     if(err){
@@ -80,6 +80,7 @@ router.post('/signup' , function (req, res , next) {
         data : null
       });
     } else if(user){
+      console.log("res done");
       res.json({
         status : 200 ,
         msg : "user saved" ,

@@ -1,5 +1,12 @@
 let mongoose = require("mongoose");
 
+
+// TOSET the name
+mongoose.connect('mongodb://localhost:27017/CMS');
+let db = mongoose.connection.on('open' , function(){
+    console.log("done with Post");
+});
+
 let PostSchema = mongoose.Schema({
    title : {
        type : String
@@ -34,7 +41,7 @@ let PostSchema = mongoose.Schema({
 
    likers : [
        {
-           type : mongoose.Types.ObjectId
+           type : mongoose.Schema.Types.ObjectId
        }
    ]
 } , {

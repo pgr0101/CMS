@@ -109,7 +109,7 @@ router.post("/changeprofile", function(req, res) {
         user.profileImage = req.body.profileUrl;
         user.save(function(err , user){
             res.json({
-                status = 200,
+                status : 200,
                 msg : "changed successfully",
                 data : user
             });
