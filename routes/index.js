@@ -5,10 +5,12 @@ var Post = require('../model/Post');
 
 // sample json model : JSON {status , msg , data , errs}
 
+// for rendering index.html of vue
 router.get('/', function(req, res, next) {
   res.render('index');
 });
 
+// an array of posts(json) has date for sorting domain.com/posts
 router.get('/posts' , function(req , res){
   Post.postsOnTop(function(err , posts){
       if(err){
@@ -23,19 +25,22 @@ router.get('/posts' , function(req , res){
         res.json({
           status : 200 ,
           msg : "found some posts" ,
-          data : posts
+          data : posts ,
+          username : req.session.username
         });
-      }
+    }
+
     });
 });
 
+// req sending json(userName , password) , returns json(status , msg , data(username , Email , phoneNumber , imageUrl))
 router.post('/login' , function (req, res, next) {
     User.getUserByUsername(req.body.username ,function(err , user){
         if(!err){
             let flag = User.comparePass(req.body.password , user.password);
             if(flag){
               try {
-                  req.session.username = req.body.username;
+                  req.session.username = req.body.userName;
                   req.session.password = req.body.password;
               }catch(e){
                   console.log(e);
@@ -53,7 +58,12 @@ router.post('/login' , function (req, res, next) {
                     res.json({
                         status : 200 ,
                         msg : "welcome user" ,
-                        data : user
+                        data : {
+                          username : user.username ,
+                          email : user.Email ,
+                          phone : user.phoneNumber ,
+                          imageUrl : user.profileImage
+                        }
                     });
                 }
             }else{
@@ -73,13 +83,14 @@ router.post('/login' , function (req, res, next) {
     });
 });
 
+// request for signing up sending a json(userName , password , Email , phoneNumber) , returning json(status , msg , data :userName , Email , phoneNumber , profileImage)
 router.post('/signup' , function (req, res , next) {
   let user = new User({
-    username : req.body.username ,
-    Email : req.body.email ,
-    phoneNumber : req.body.phone ,
-    password : req.body.password ,
-    profileImage : (req.body.profile != null ? req.body.profile : null)
+    username : req.body.userName ,
+    Email : req.body.Email ,
+    phoneNumber : req.body.phoneNumber ,
+    password : req.body.password 
+  //  profileImage : (req.body.profile != null ? req.body.profile : null)
   });
   User.register(user , function(err , user){
     if(err){
@@ -94,7 +105,7 @@ router.post('/signup' , function (req, res , next) {
         status : 200 ,
         msg : "user saved" ,
         data : {
-          username : user.username ,
+          userName : user.username ,
           Email : user.Email ,
           phoneNumber : user.phoneNumber
         }
@@ -103,6 +114,7 @@ router.post('/signup' , function (req, res , next) {
   });
 });
 
+// return a json(status , msg)
 router.post('/logout' , function(req , res){
   req.session.username = undefined;
   req.session.password = undefined;
@@ -137,3 +149,4 @@ router.post('/loginPassport',
         res.redirect('/users/' + req.user.username);
     });
 */
+

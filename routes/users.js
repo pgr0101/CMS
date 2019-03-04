@@ -3,7 +3,7 @@ var router = express.Router();
 var User = require("../model/User");
 var Post = require("../model/Post");
 
-
+// request url : domain.com/users/post , return response : {status , msg , data :{user's.posts{title , text , images , comments(username@text) , likes , likers}}}
 router.get('/post' , function (req, res, next) {
   // TODO res.render("post" , data )
   User.getUserByUsername(req.session.username , function(err , user){
@@ -44,6 +44,7 @@ router.get('/post' , function (req, res, next) {
   });
 });
 
+// for sending posts json(title , userName , text , imagesUrl) returns json(status , msg)
 router.post('/post' , function (req, res, next) {
   // TODO saving post in mongoose
   User.getUserByUsername(req.session.username , function(err , user){
@@ -105,6 +106,7 @@ router.post('/post' , function (req, res, next) {
       });
 });
 
+// sending json(postID , userName of liker)  , returns json(status , msg)
 router.post('/like' , function (req, res, next) {
   // TODO : adding a like of a post in mongoose
   User.getUserByUsername(req.session.username , function(err , user){
@@ -145,6 +147,7 @@ router.post('/like' , function (req, res, next) {
 
 });
 
+// sending json(userName , text , postID) returns json(status , msg) url : domain.com/users/comment
 router.post('/comment' , function (req, res, next) {
   // TODO : adding a comment to post
     User.getUserByUsername(req.session.username , function(err , user){
@@ -186,6 +189,7 @@ router.post('/comment' , function (req, res, next) {
 
 });
 
+// sending json(postID) returns json(status , json) domain.com/users/delete
 router.delete("/post", function(req, res) {
   // TODO delete the post with postid from req.body.postID
   // check the session before
@@ -226,6 +230,8 @@ router.delete("/post", function(req, res) {
     });
 });
 
+
+// working ...
 router.post("/changeprofile", function(req, res) {
     User.getUserByUsername(req.session.username , function(err , user){
         if(!err){
@@ -259,3 +265,6 @@ router.post("/changeprofile", function(req, res) {
 });
 
 module.exports = router;
+
+
+
