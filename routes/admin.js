@@ -7,7 +7,7 @@ var Post = require("../model/Post");
 
 function isAdmin(username , password){
     let answer = false;
-    User.getUserByUsername(username , function(err , user){
+    User.getUserByusername(username , function(err , user){
         let flag = User.comparePass(password , user.password);
         if(flag){
             answer = user.isAdmin;
@@ -20,11 +20,11 @@ function isAdmin(username , password){
 router.post("/post", function(req, res, next) {
   // TODO saving post
   let flag = isAdmin(
-    req.session.userName , req.session.password);
+    req.session.username , req.session.password);
   if (flag) {
     let post = new Post({
       title: req.body.title,
-      author: req.session.userName,
+      author: req.session.username,
       text : req.body.text,
       imagesUrl: req.body.imagesUrl
     });
@@ -32,7 +32,7 @@ router.post("/post", function(req, res, next) {
       if (err) {
         res.json({ status: 406, msg: "didn't save post", error: err });
       } else {
-        User.addPost(req.session.userName, post.id, function(err) {
+        User.addPost(req.session.username, post.id, function(err) {
           if (err) {
             res.json({
               status: 406,
@@ -61,7 +61,7 @@ router.delete("/post", function(req, res) {
   // TODO delete the post with postid from req.body.postID
   // check the session before
   let flag = isAdmin(
-      req.session.userName , req.session.password);
+      req.session.username , req.session.password);
   if (flag) {
     Post.remove(req.body.postID, function(err) {
       if (err) {
@@ -89,32 +89,13 @@ router.delete("/post", function(req, res) {
 });
 
 
-// working ...
-router.post("/dashboard", function(req, res, next) {
-  // TODO : change settings and generals of the site
-  let flag = isAdmin(
-      req.session.userName , req.session.password);
-  if(flag){
-        res.json({ 
-            status: 200, 
-            msg: "change settings and site", 
-            data: null });
-    }else{
-        res.json({
-            status : 403 ,
-            msg : "forbidden. no access" ,
-            data : null
-        })
-    }
-});
-
 
 router.post("/changeprofile", function(req, res) {
   let flag = isAdmin(
-      req.session.userName , req.session.password);
+      req.session.username , req.session.password);
   if(flag){
       let user = User
-          .getUserByUsername(req.session.userName);
+          .getUserByusername(req.session.username);
       user.profileImage = req.body.profile;
       user.save(function(err , user){
           res.json({
@@ -130,6 +111,30 @@ router.post("/changeprofile", function(req, res) {
           data : null
       });
   }
+});
+
+
+
+
+
+
+// working ...
+router.post("/dashboard", function(req, res, next) {
+  // TODO : change settings and generals of the site
+  let flag = isAdmin(
+      req.session.username , req.session.password);
+  if(flag){
+        res.json({ 
+            status: 200, 
+            msg: "change settings and site", 
+            data: null });
+    }else{
+        res.json({
+            status : 403 ,
+            msg : "forbidden. no access" ,
+            data : null
+        })
+    }
 });
 
 

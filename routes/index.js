@@ -33,14 +33,14 @@ router.get('/posts' , function(req , res){
     });
 });
 
-// req sending json(userName , password) , returns json(status , msg , data(username , Email , phoneNumber , imageUrl))
+// req sending json(username , password) , returns json(status , msg , data(username , Email , phoneNumber , imageUrl))
 router.post('/login' , function (req, res, next) {
-    User.getUserByUsername(req.body.username ,function(err , user){
+    User.getUserByusername(req.body.username ,function(err , user){
         if(!err){
             let flag = User.comparePass(req.body.password , user.password);
             if(flag){
               try {
-                  req.session.username = req.body.userName;
+                  req.session.username = req.body.username;
                   req.session.password = req.body.password;
               }catch(e){
                   console.log(e);
@@ -83,10 +83,10 @@ router.post('/login' , function (req, res, next) {
     });
 });
 
-// request for signing up sending a json(userName , password , Email , phoneNumber) , returning json(status , msg , data :userName , Email , phoneNumber , profileImage)
+// request for signing up sending a json(username , password , Email , phoneNumber) , returning json(status , msg , data :username , Email , phoneNumber , profileImage)
 router.post('/signup' , function (req, res , next) {
   let user = new User({
-    username : req.body.userName ,
+    username : req.body.username ,
     Email : req.body.Email ,
     phoneNumber : req.body.phoneNumber ,
     password : req.body.password 
@@ -105,7 +105,7 @@ router.post('/signup' , function (req, res , next) {
         status : 200 ,
         msg : "user saved" ,
         data : {
-          userName : user.username ,
+          username : user.username ,
           Email : user.Email ,
           phoneNumber : user.phoneNumber
         }
@@ -122,6 +122,11 @@ router.post('/logout' , function(req , res){
       status : 200 ,
       msg  : "logged out"
   });
+});
+
+
+router.post('/verify' , function(req , res , next){
+    User.findOne()
 });
 
 module.exports = router;

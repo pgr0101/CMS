@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// we can use config.json instead configing manually in all web apps we have the same thing
+
 /**
  * Module dependencies.
  */

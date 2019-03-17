@@ -49,7 +49,31 @@ let UserSchema = mongoose.Schema({
             type : mongoose.Schema.Types.ObjectId ,
             ref : 'Post'
        }
-   ]
+   ] , 
+
+   productsToBuy : [{
+       type : mongoose.Types.ObjectId ,
+       ref : 'product'
+   }] , 
+
+   isSeller : {
+       type : Boolean , 
+       default : true
+   } ,
+
+   productsToSell : [{
+        type : mongoose.Types.ObjectId ,
+        ref : 'product'
+    }] , 
+
+   verified : {
+       type : Boolean , 
+       default : false
+   } ,
+
+   payment : {
+       type : Number 
+   }
 } ,  {
     toObject: {
         transform: function (doc, ret) {
@@ -79,9 +103,9 @@ module.exports.register = function(userDoc, cb){
 };
 
 
-module.exports.getUserByUsername =  function(userName , cb){
+module.exports.getUserByusername =  function(username , cb){
     // TODO : find user By username and return it
-    User.findOne({username : userName} , cb);
+    User.findOne({username : username} , cb);
 };
 
 module.exports.comparePass = async function(passwd , upasswd){
@@ -89,20 +113,22 @@ module.exports.comparePass = async function(passwd , upasswd){
     return answer;
 };
 
-module.exports.addToSaved = function(userName , postID , callback){
+module.exports.addToSaved = function(username , postID , callback){
     // TODO : save the postid to saved posts
-    let user = getUserByUsername(userName);
+    let user = getUserByusername(username);
     user.savedPosts.push(postID);
     user.save(callback);
 };
 
-module.exports.addPost = function (userName , callback){
+module.exports.addPost = function (username , callback){
     // TODO adding the post id to user posts
-    User.getUserByUsername(userName , callback);
+    User.getUserByusername(username , callback);
 };
 
 module.exports.getPosts = function(username , cb){
-    User.findOne({userName : username}).
+    User.findOne({username : username}).
         populate('posts').exec(cb);
-}
+};
 
+
+// add methods for buying products and adding products

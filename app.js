@@ -50,7 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended : false}));
 app.use(session({secret: "Shh, its a secret!"}));
 
-
+// routing should be in the last part of uses
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin' , adminRouter);
