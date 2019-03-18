@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var User = require("../model/User");
 var Post = require("../model/Post");
+const { check, validationResult } = require('express-validator/check');
 
 // url : domain.com/admin/..
 

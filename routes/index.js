@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var User = require('../model/User');
 var Post = require('../model/Post');
+var sms = require("../services/sms");
+const { check, validationResult } = require('express-validator/check');
 
 // sample json model : JSON {status , msg , data , errs}
 
@@ -34,7 +36,7 @@ router.get('/posts' , function(req , res){
 });
 
 // req sending json(username , password) , returns json(status , msg , data(username , Email , phoneNumber , imageUrl))
-router.post('/login' , function (req, res, next) {
+router.post('/login' ,function (req, res, next) {
     User.getUserByusername(req.body.username ,function(err , user){
         if(!err){
             let flag = User.comparePass(req.body.password , user.password);
@@ -87,45 +89,55 @@ router.post('/login' , function (req, res, next) {
 });
 
 // request for signing up sending a json(username , password , Email , phoneNumber , profile) , returning json(status , msg , data :username , Email , phoneNumber , profileImage)
-router.post('/signup' , function (req, res , next) {
+router.post('/signup' , [check('Email').isEmail() , check('phoneNumber').isMobilePhone() ,
+        check('profile').isURL() , check('username').isLength({min : 8})] , function (req, res , next) {
   // TODO validation
-  let code = Math.seedrandom('cipher');
-  let user = new User({
-    username : req.body.username ,
-    Email : req.body.Email ,
-    phoneNumber : req.body.phoneNumber ,
-    password : req.body.password ,
-    profileImage : (req.body.profile != null ? req.body.profile : null) , 
-    verifyCode : code
-  });
-  User.register(user , function(err , user){
-    if(err){
-        console.log(err);
-      res.json({
-        status : 406,
-        msg : "Not acceptable data",
-      });
-    } else if(user){
-      let answer = User.sendVerificationCode(user.phoneNumber , code);
-      if(answer){
+  let errors = validationResult(req);
+  if(!errors){
+    let code = Math.seedrandom('cipher');
+    let user = new User({
+      username : req.body.username ,
+      Email : req.body.Email ,
+      phoneNumber : req.body.phoneNumber ,
+      password : req.body.password ,
+      profileImage : (req.body.profile != null ? req.body.profile : null) , 
+      verifyCode : code
+    });
+    User.register(user , function(err , user){
+      if(err){
+          console.log(err);
         res.json({
-          status : 200 ,
-          msg : "user saved and code sent" ,
-          data : {
-            username : user.username ,
-            Email : user.Email ,
-            phoneNumber : user.phoneNumber ,
-            profileImage : user.profileImage
-          }
+          status : 406,
+          msg : "Not acceptable data",
         });
-      } else {
-        res.json({
-          status : 406 ,
-          msg : "a problem with verification pleas try later" ,
-        });
+      } else if(user){
+        let answer = sms.sendVerificationCode(user.phoneNumber , code);
+        if(answer){
+          res.json({
+            status : 200 ,
+            msg : "user saved and code sent" ,
+            data : {
+              username : user.username ,
+              Email : user.Email ,
+              phoneNumber : user.phoneNumber ,
+              profileImage : user.profileImage
+            }
+          });
+        } else {
+          res.json({
+            status : 406 ,
+            msg : "a problem with verification pleas try later" ,
+          });
+        }
       }
-    }
-  });
+    });
+  }else{
+    res.json({
+      status : 406 ,
+      msg : "something was wrong" ,
+      err : errors
+    });
+  }
 });
 
 // return a json(status , msg)

@@ -123,12 +123,3 @@ module.exports.getPosts = function(username , cb){
         populate('posts').exec(cb);
 };
 
-// working on buying products
-
-module.exports.sendVerificationCode = function(username , code) {
-    let answer = true;
-    // TODO send sms with api  
-    // site : https://www.sms.ir/
-    
-    return answer;
-};

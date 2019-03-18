@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 var User = require("../model/User");
 var Post = require("../model/Post");
+var sms = require("../services/sms");
+const { check, validationResult } = require('express-validator/check');
+
 
 // request url : domain.com/users/post , return response : {status , msg , data :{user's.posts{title , text , images , comments(username@text) , likes , likers}}}
 router.get('/post' , function (req, res, next) {
@@ -285,7 +288,7 @@ router.get('/sendCodeAgain' , function(req , res , next){
         user.verifyCode = code;
         user.save(function(err , user){
             if(!err){
-                let answer = User.sendVerificationCode(user.phoneNumber , user.verifyCode);
+                let answer = sms.sendVerificationCode(user.phoneNumber , user.verifyCode);
                 if(answer){
                     res.json({
                         status : 200 ,
@@ -328,3 +331,4 @@ module.exports = router;
 
  
 
+ 

@@ -1,4 +1,5 @@
 let router = require('express').Router();
+const { check, validationResult } = require('express-validator/check');
 
 
 router.use(function(req , res , next){
