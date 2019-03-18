@@ -44,6 +44,10 @@ router.post('/login' , function (req, res, next) {
                   req.session.password = req.body.password;
               }catch(e){
                   console.log(e);
+                  res.json({
+                    status : 406 ,
+                    msg : "error occured"
+                  });
               }
               if(user.isAdmin){
                     res.json({
@@ -54,7 +58,6 @@ router.post('/login' , function (req, res, next) {
                         }
                     });
                 }else{
-                    console.log("res done");
                     res.json({
                         status : 200 ,
                         msg : "welcome user" ,
@@ -83,14 +86,17 @@ router.post('/login' , function (req, res, next) {
     });
 });
 
-// request for signing up sending a json(username , password , Email , phoneNumber) , returning json(status , msg , data :username , Email , phoneNumber , profileImage)
+// request for signing up sending a json(username , password , Email , phoneNumber , profile) , returning json(status , msg , data :username , Email , phoneNumber , profileImage)
 router.post('/signup' , function (req, res , next) {
+  // TODO validation
+  let code = Math.seedrandom('cipher');
   let user = new User({
     username : req.body.username ,
     Email : req.body.Email ,
     phoneNumber : req.body.phoneNumber ,
-    password : req.body.password 
-  //  profileImage : (req.body.profile != null ? req.body.profile : null)
+    password : req.body.password ,
+    profileImage : (req.body.profile != null ? req.body.profile : null) , 
+    verifyCode : code
   });
   User.register(user , function(err , user){
     if(err){
@@ -98,18 +104,26 @@ router.post('/signup' , function (req, res , next) {
       res.json({
         status : 406,
         msg : "Not acceptable data",
-        data : null
       });
     } else if(user){
-      res.json({
-        status : 200 ,
-        msg : "user saved" ,
-        data : {
-          username : user.username ,
-          Email : user.Email ,
-          phoneNumber : user.phoneNumber
-        }
-      });
+      let answer = User.sendVerificationCode(user.phoneNumber , code);
+      if(answer){
+        res.json({
+          status : 200 ,
+          msg : "user saved and code sent" ,
+          data : {
+            username : user.username ,
+            Email : user.Email ,
+            phoneNumber : user.phoneNumber ,
+            profileImage : user.profileImage
+          }
+        });
+      } else {
+        res.json({
+          status : 406 ,
+          msg : "a problem with verification pleas try later" ,
+        });
+      }
     }
   });
 });
@@ -124,10 +138,7 @@ router.post('/logout' , function(req , res){
   });
 });
 
-
-router.post('/verify' , function(req , res , next){
-    User.findOne()
-});
+ 
 
 module.exports = router;
 
@@ -142,7 +153,6 @@ module.exports = router;
 402 Payment Required
 403 Forbidden
 406 Not Acceptable
-500 Internal Server Error
 */
 
 /*

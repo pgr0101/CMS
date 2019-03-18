@@ -5,40 +5,30 @@ var Post = require("../model/Post");
 
 // request url : domain.com/users/post , return response : {status , msg , data :{user's.posts{title , text , images , comments(username@text) , likes , likers}}}
 router.get('/post' , function (req, res, next) {
-  // TODO res.render("post" , data )
   User.getUserByusername(req.session.username , function(err , user){
       if(!err){
-          let flag = User.comparePass(req.session.password , user.password);
-          if(flag){
-              User.getPosts(req.session.username ,
-                  function(err , user){
-                      if(err){
-                          res.json({
-                              status : 406 ,
-                              msg : "error occurred try later",
-                              error : err,
-                              data : null
-                          })
-                      }else{
-                          res.json({
-                              status : 200 ,
-                              msg : "found your posts" ,
-                              data : user.posts
-                          })
-                      }
-                  });
-          }else{
-              res.json({
-                  status : 403,
-                  msg : "forbidden. no access" ,
-                  data : null
-              })
-          }
+        User.getPosts(req.session.username ,
+            function(err , user){
+                if(err){
+                    res.json({
+                        status : 406 ,
+                        msg : "error occurred try later",
+                        error : err,
+                        data : null
+                    })
+                }else{
+                    res.json({
+                        status : 200 ,
+                        msg : "found your posts" ,
+                        data : user.posts
+                    })
+                }
+            });          
       }else{
           console.log(err);
           res.json({
-             status : 406 ,
-             msg : "error occurred"
+             status : 400 ,
+             msg : "error occurred or user not found"
           });
       }
   });
@@ -49,58 +39,53 @@ router.post('/post' , function (req, res, next) {
   // TODO saving post in mongoose
   User.getUserByusername(req.session.username , function(err , user){
       if(!err){
-        let flag = User.comparePass(req.session.password , user.password);
-        if (flag) {
-              let post = new Post({
-                  title: req.body.title,
-                  author: req.session.username,
-                  text : req.body.text
-              });
-              post.imagesUrl.push(req.body.imagesUrl);
-              Post.savePost(post , function(err, post) {
-                  if (err) {
-                      console.log(err);
-                      res.json({ status: 406, msg: "didn't save post" });
-                  } else {
-                      User.addPost(req.session.username, function(err , user) {
-                          if (err) {
-                              console.log(err);
-                              res.json({
-                                  status: 406,
-                                  msg: "didn't save post",
-                              });
-                          } else {
-                              user.posts.push(post.id);
-                              user.save(function(err){
-                                  if(err){
-                                      console.log(err);
-                                      res.json({
-                                          status: 406,
-                                          msg: "post didn't save",
-                                      });
-                                  }else{
-                                      res.json({
-                                          status: 200,
-                                          msg: "post saved",
-                                          data: post
-                                      });
-                                  }
-                              });
-                          }
-                      });
-                  }
-              });
-          } else {
-              res.json({
-                  status: 403,
-                  msg: "forbidden. no access"
-              });
-          }
+        let post = new Post({
+            title: req.body.title,
+            author: req.session.username,
+            text : req.body.text
+        });
+        post.imagesUrl.push(req.body.imagesUrl);
+        Post.savePost(post , function(err, post) {
+            if (err) {
+                console.log(err);
+                res.json({ 
+                    status: 406, 
+                    msg: "didn't save post, post problem , not acceptable" 
+                });
+            } else {
+                User.addPost(req.session.username, function(err , user) {
+                    if (err) {
+                        console.log(err);
+                        res.json({
+                            status: 400,
+                            msg: "didn't save post cause of user problem",
+                        });
+                    } else {
+                        user.posts.push(post.id);
+                        user.save(function(err){
+                            if(err){
+                                console.log(err);
+                                res.json({
+                                    status: 400,
+                                    msg: "post didn't save , user problem",
+                                });
+                            }else{
+                                res.json({
+                                    status: 200,
+                                    msg: "post saved",
+                                    data: post
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
       }else{
           console.log(err);
           res.json({
-             status : 406 ,
-             msg : "error occurred"
+             status : 400 ,
+             msg : "error occurred or user didn't found"
           });
       }
       });
@@ -110,32 +95,23 @@ router.post('/post' , function (req, res, next) {
 router.post('/like' , function (req, res, next) {
   // TODO : adding a like of a post in mongoose
   User.getUserByusername(req.session.username , function(err , user){
-    let flag = User.comparePass(req.session.password , user.password);
     if(!err){
-        if(flag){
-            Post.like(req.session.username , req.body.postID ,
-                function(err){
-                    if(err){
-                        res.json({
-                            status : 406,
-                            msg : "error occurred",
-                            error : err
-                        });
-                    }else{
-                        res.json({
-                            status : 200 ,
-                            msg : "post liked" ,
-                            data : null
-                        });
-                    }
-                })
-        }else{
-            res.json({
-                status : 403 ,
-                msg : "forbidden. no access",
-                data : null
-            })
-        }
+        Post.like(req.session.username , req.body.postID ,
+            function(err){
+                if(err){
+                    res.json({
+                        status : 406,
+                        msg : "error occurred",
+                        error : err
+                    });
+                }else{
+                    res.json({
+                        status : 200 ,
+                        msg : "post liked" ,
+                        data : null
+                });
+            }
+        });
     }else{
         console.log(err);
         res.json({
@@ -144,7 +120,6 @@ router.post('/like' , function (req, res, next) {
         });
     }
   });
-
 });
 
 // sending json(username , text , postID) returns json(status , msg) url : domain.com/users/comment
@@ -152,36 +127,27 @@ router.post('/comment' , function (req, res, next) {
   // TODO : adding a comment to post
     User.getUserByusername(req.session.username , function(err , user){
     if(!err){
-        let flag = User.comparePass(req.session.password , user.password);
-        if(flag){
-            Post.comment(req.body.postID , req.session.username ,
-                req.body.text , function(err){
-                    if(err){
-                        res.json({
-                            status : 406 ,
-                            msg : "error occurred",
-                            error : err
-                        });
-                    }else{
-                        res.json({
-                            status : 200 ,
-                            msg : "commented successfully",
-                            data : null
-                        });
-                    }
-                });
-        }else{
-            res.json({
-                status : 403,
-                msg : "forbidden. no access",
-                data : null
-            })
-        }
+        Post.comment(req.body.postID , req.session.username ,
+            req.body.text , function(err){
+                if(err){
+                    res.json({
+                        status : 406 ,
+                        msg : "error occurred , not acceptable",
+                        error : err
+                    });
+                }else{
+                    res.json({
+                        status : 200 ,
+                        msg : "commented successfully",
+                        data : null
+                    });
+                }
+        });
     }else{
         console.log(err);
         res.json({
-            status : 406,
-            msg : "error occurred"
+            status : 400,
+            msg : "error occurred , user problem"
         })
     }
     });
@@ -192,39 +158,29 @@ router.post('/comment' , function (req, res, next) {
 // sending json(postID) returns json(status , json) domain.com/users/delete
 router.delete("/post", function(req, res) {
   // TODO delete the post with postid from req.body.postID
-  // check the session before
     User.getUserByusername(req.session.username , function(err , user){
-        let flag = User.comparePass(req.session.password , user.password);
         if(!err){
-            if (flag) {
-                Post.remove(req.body.postID, function(err) {
-                    if (err) {
-                        res.json({
-                            status: 406,
-                            msg: "didn't delete post",
-                            error: err,
-                            data: null
-                        });
-                    } else {
-                        res.json({
-                            status: 200,
-                            msg: "post deleted",
-                            data: null
-                        });
-                    }
-                });
-            } else {
-                res.json({
-                    status: 403,
-                    msg: "forbidden , no access",
-                    data: null
-                });
-            }
+            Post.remove(req.body.postID, function(err) {
+                if (err) {
+                    res.json({
+                        status: 400,
+                        msg: "didn't delete post , post problem",
+                        error: err,
+                        data: null
+                    });
+                } else {
+                    res.json({
+                        status: 200,
+                        msg: "post deleted",
+                        data: null
+                    });
+                }
+            });
         }else{
             console.log(err);
             res.json({
-                status : 406,
-                msg : "error occurred"
+                status : 400,
+                msg : "error occurred , user problem"
             })
         }
     });
@@ -234,30 +190,28 @@ router.delete("/post", function(req, res) {
 router.post("/changeprofile", function(req, res) {
     User.getUserByusername(req.session.username , function(err , user){
         if(!err){
-            let flag = User.comparePass(req.session.password , user.password);
-            if(flag){
-                let user = User
-                    .getUserByusername(req.session.username);
-                user.profileImage = req.body.profile;
-                user.save(function(err , user){
+            let user = User
+                .getUserByusername(req.session.username);
+            user.profileImage = req.body.profile;
+            user.save(function(err , user){
+                if(err){
+                    res.json({
+                        status : 406 ,
+                        msg : "profile problem , not acceptable"
+                    });
+                }else{
                     res.json({
                         status : 200,
                         msg : "changed successfully",
                         data : user
                     });
-                });
-            }else{
-                res.json({
-                    status : 403 ,
-                    msg : "forbidden. no access" ,
-                    data : null
-                });
-            }
+                }
+            });
         }else{
             console.log(err);
             res.json({
-                status : 406 ,
-                msg : "error occurred"
+                status : 400 ,
+                msg : "error occurred , user problem"
             })
         }
     });
@@ -267,46 +221,110 @@ router.post("/changeprofile", function(req, res) {
 router.post('/addtosavedpost' , function(req , res , next) {
     User.getUserByusername(req.session.username , function(err , user){
         if(!err){
-            let flag = User.comparePass(req.session.password , user.password);
-            if(flag){
-                let user = User
-                    .getUserByusername(req.session.username);
-                user.savedPosts.push(req.body.postID);
-                user.save(function(err , user){
-                    res.json({
-                        status : 200,
-                        msg : "changed successfully",
-                        data : user
-                    });
-                });
-            }else{
+            let user = User
+                .getUserByusername(req.session.username);
+            user.savedPosts.push(req.body.postID);
+            user.save(function(err , user){
                 res.json({
-                    status : 403 ,
-                    msg : "forbidden. no access" ,
-                    data : null
+                    status : 200,
+                    msg : "changed successfully",
+                    data : user
                 });
-            }
+            });
         }else{
             console.log(err);
             res.json({
                 status : 406 ,
-                msg : "error occurred"
+                msg : "error occurred , user problem"
             })
         }
     });
 });
 
 
-
-// verification on working and for sellers and buying ... 
-
+// send json(code) returns json(status , msg)
 router.post('/verify' , function(req , res , next){
-    // TODO verification 
-    // first generate a random number and send that to the phonenumber 
-    // then check the code and not giving access till verification
+    User.getUserByusername(req.session.username , function(err , user){
+      if(!err){
+        if(req.body.code == user.verifyCode){
+            user.verified = true;
+            user.save(function(err , user){
+                if(!err){
+                    res.json({
+                        status : 200 , 
+                        msg : "verified successfully"
+                    });
+                }else{
+                    res.json({
+                        status : 400 , 
+                        msg : "couldn't verify try later"
+                    });
+                }
+            });
+        }else{
+            res.json({
+                status : 400 , 
+                msg : "code was wrong"
+            });
+        }
+        
+      }else{
+        res.json({
+            status : 400 ,
+            msg : "bad request user didn't found"
+        });
+      }
+    });
 });
+
+// send nothing returns json(status , msg)
+router.get('/sendCodeAgain' , function(req , res , next){ 
+    User.getUserByusername(req.session.username , function(err , user){
+      if(!err){
+        let code = Math.seedrandom('cipher');
+        user.verifyCode = code;
+        user.save(function(err , user){
+            if(!err){
+                let answer = User.sendVerificationCode(user.phoneNumber , user.verifyCode);
+                if(answer){
+                    res.json({
+                        status : 200 ,
+                        msg : "code sent" ,
+                        data : {
+                        username : user.username ,
+                        Email : user.Email ,
+                        phoneNumber : user.phoneNumber
+                    }
+                });
+                }else{
+                    res.json({
+                        status : 406 ,
+                        msg : "verification code sending problem try later" ,
+                    });
+                }
+            }else{
+                res.json({
+                    status : 400 ,
+                    msg : "problem with verification code" ,
+                });
+            }
+        });
+      }else{
+        res.json({
+          status : 400 ,
+          msg : "bad request user didn't found" ,
+          data : {
+            username : user.username ,
+            Email : user.Email ,
+            phoneNumber : user.phoneNumber
+          }
+        });
+      }
+    });
+});
+
 
 module.exports = router;
 
-
+ 
 

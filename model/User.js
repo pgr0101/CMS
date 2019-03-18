@@ -5,7 +5,7 @@ let bcrypt = require('bcryptjs');
 mongoose.connect('mongodb://localhost:27017/CMS');
 let db = mongoose.connection.on('open' , function(){
     console.log("done with User");
-});
+}); 
 
 
 let UserSchema = mongoose.Schema({
@@ -40,6 +40,7 @@ let UserSchema = mongoose.Schema({
            ref : 'Post'
        }
    ] ,
+   
    profileImage : {
        type : String
    } ,
@@ -56,24 +57,16 @@ let UserSchema = mongoose.Schema({
        ref : 'product'
    }] , 
 
-   isSeller : {
-       type : Boolean , 
-       default : true
+   verifyCode : {
+       type : Number , 
+       required : true
    } ,
-
-   productsToSell : [{
-        type : mongoose.Types.ObjectId ,
-        ref : 'product'
-    }] , 
 
    verified : {
        type : Boolean , 
        default : false
    } ,
 
-   payment : {
-       type : Number 
-   }
 } ,  {
     toObject: {
         transform: function (doc, ret) {
@@ -130,5 +123,12 @@ module.exports.getPosts = function(username , cb){
         populate('posts').exec(cb);
 };
 
+// working on buying products
 
-// add methods for buying products and adding products
+module.exports.sendVerificationCode = function(username , code) {
+    let answer = true;
+    // TODO send sms with api  
+    // site : https://www.sms.ir/
+    
+    return answer;
+};

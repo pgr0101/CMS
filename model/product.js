@@ -51,6 +51,17 @@ let productSchema = mongoose.Schema({
         type : Number
     }
 
+},  {
+    toObject: {
+        transform: function (doc, ret) {
+            delete ret._id;
+        }
+    },
+    toJSON: {
+        transform: function (doc, ret) {
+            delete ret._id;
+        }
+    }
 });
 
 

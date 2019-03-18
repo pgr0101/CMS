@@ -89,7 +89,6 @@ router.delete("/post", function(req, res) {
 });
 
 
-
 router.post("/changeprofile", function(req, res) {
   let flag = isAdmin(
       req.session.username , req.session.password);
@@ -115,30 +114,14 @@ router.post("/changeprofile", function(req, res) {
 
 
 
-
-
-
-// working ...
-router.post("/dashboard", function(req, res, next) {
-  // TODO : change settings and generals of the site
-  let flag = isAdmin(
-      req.session.username , req.session.password);
-  if(flag){
-        res.json({ 
-            status: 200, 
-            msg: "change settings and site", 
-            data: null });
-    }else{
-        res.json({
-            status : 403 ,
-            msg : "forbidden. no access" ,
-            data : null
-        })
-    }
-});
+// deleteing users and their posts and seller and products
+/**
+ * thinking about admin options and working on that
+ * */ 
 
 
 module.exports = router;
 
 
 
+ 
