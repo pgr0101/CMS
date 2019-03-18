@@ -52,11 +52,6 @@ let UserSchema = mongoose.Schema({
        }
    ] , 
 
-   productsToBuy : [{
-       type : mongoose.Types.ObjectId ,
-       ref : 'product'
-   }] , 
-
    verifyCode : {
        type : Number , 
        required : true
